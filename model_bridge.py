@@ -6,10 +6,21 @@ import openpyxl
 
 BASE_DIR = Path(__file__).resolve().parent
 MODEL_FILE = BASE_DIR / "Vyomaa_P3_P4_Capital_Raise_Model_v8(3).xlsx"
+
+
 SOFFICE_CANDIDATES = [
     Path(r"C:\Program Files\LibreOffice\program\soffice.exe"),
     Path(r"C:\Program Files (x86)\LibreOffice\program\soffice.exe"),
 ]
+
+def find_soffice():
+    # Check Windows paths first, then Linux hosting
+    for path in SOFFICE_CANDIDATES:
+        if path.exists():
+            return str(path)
+
+    return shutil.which("libreoffice") or shutil.which("soffice")
+
 
 
 def find_soffice():
@@ -31,11 +42,11 @@ def recalculate_workbook(scenario="Base case", overrides=None):
         )
 
     soffice = find_soffice()
-    if not soffice:
-        raise FileNotFoundError(
-            "LibreOffice was not found at the standard Windows paths. "
-            "Update SOFFICE_CANDIDATES in model_bridge.py to your soffice.exe path."
-        )
+
+if not soffice:
+    raise RuntimeError(
+        "LibreOffice was not found. Install it using packages.txt."
+    )
 
     safe_scenario = "".join(
         ch if ch.isalnum() or ch in ("-", "_") else "_"
